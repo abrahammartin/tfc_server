@@ -19,58 +19,39 @@ package uk.ac.cam.tfc_server.rita;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.DeploymentOptions;
-
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.http.HttpMethod;
-
-import io.vertx.core.file.FileSystem;
-import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
-
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
-
-// vertx web, service proxy, sockjs eventbus bridge
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
-import io.vertx.ext.web.handler.sockjs.BridgeOptions;
-import io.vertx.ext.web.handler.sockjs.PermittedOptions;
-import io.vertx.ext.web.handler.sockjs.SockJSHandler;
-import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
-import io.vertx.ext.web.handler.sockjs.SockJSSocket;
-
-// handlebars for static .hbs web template files
+import io.vertx.ext.web.handler.sockjs.*;
 import io.vertx.ext.web.templ.HandlebarsTemplateEngine;
-
-import java.io.*;
-import java.time.*;
-import java.time.format.*;
-import java.util.*;
-
-// other tfc_server classes
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.Constants;
 import uk.ac.cam.tfc_server.util.Log;
 
-public class Rita extends AbstractVerticle {
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Set;
+
+// vertx web, service proxy, sockjs eventbus bridge
+// handlebars for static .hbs web template files
+// other tfc_server classes
+
+public class Rita extends AbstractTFCVerticle {
 
     // values from config()
     private Integer HTTP_PORT;
     private String RITA_ADDRESS;
-    private String EB_SYSTEM_STATUS;
-    private String EB_MANAGER;
-    private String MODULE_NAME;
-    private String MODULE_ID;
     private String WEBROOT;
     private int    LOG_LEVEL;
-    
     
     //debug - feedplayers and zonemanagers may come from user commands
     private ArrayList<String> FEEDPLAYERS; // optional from config()
@@ -562,49 +543,15 @@ public class Rita extends AbstractVerticle {
     }
     
     // Load initialization global constants defining this module from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        // module.name e.g. "rita"
-        // module.id e.g. "A"
-        // eb.system_status - String eventbus address for system status messages
-        // eb.manager - evenbus address to subscribe to for system management messages
-
-        MODULE_NAME = config().getString("module.name"); // "rita"
-        if (MODULE_NAME==null)
-            {
-                System.err.println("Rita: no module.name in config()");
-                return false;
-            }
-        
-        MODULE_ID = config().getString("module.id"); // A, B, ...
-        if (MODULE_ID==null)
-            {
-                System.err.println("Rita: no module.id in config()");
-                return false;
-            }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         LOG_LEVEL = config().getInteger(MODULE_NAME+".log_level", 0);
         if (LOG_LEVEL==0)
             {
                 LOG_LEVEL = Constants.LOG_INFO;
-            }
-        
-        // common system status reporting address, e.g. for UP messages
-        // picked up by Console
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS==null)
-            {
-                System.err.println("Rita: no eb.system_status in config()");
-                return false;
-            }
-
-        // system control address - commands are broadcast on this
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER==null)
-            {
-                System.err.println("Rita: no eb.manager in config()");
-                return false;
             }
 
         // eventbus address for this Rita to publish its messages to

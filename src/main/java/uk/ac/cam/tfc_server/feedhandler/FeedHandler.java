@@ -52,44 +52,31 @@ package uk.ac.cam.tfc_server.feedhandler;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
 
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.Route;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
 
-import java.io.*;
 import java.time.*;
 import java.time.format.*;
-import java.util.*;
 
 // other tfc_server classes
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.GTFS;
 import uk.ac.cam.tfc_server.util.Log;
 import uk.ac.cam.tfc_server.util.Constants;
 
-public class FeedHandler extends AbstractVerticle {
+public class FeedHandler extends AbstractTFCVerticle {
 
     private final String VERSION = "1.12";
-    
+
     // from config()
-    private String MODULE_NAME;       // config module.name - normally "feedhandler"
-    private String MODULE_ID;         // config module.id
-    private String EB_SYSTEM_STATUS;  // config eb.system_status
-    private String EB_MANAGER;        // config eb.manager
-    
     private int HTTP_PORT;            // config feedplayer.http.port
     private String HTTP_TOKEN;        // config feedplayer.http.token, can be null
 
@@ -359,46 +346,15 @@ public class FeedHandler extends AbstractVerticle {
   } // end write_file
 
     // Load initialization global constants defining this FeedHandler from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   module.name - usually "zone"
-        //   module.id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-        //   eb.manager - eventbus address for manager messages
-        
-        MODULE_NAME = config().getString("module.name");
-        if (MODULE_NAME == null)
-            {
-                Log.log_err("FeedHandler: config() not set");
-                return false;
-            }
-        
-        MODULE_ID = config().getString("module.id");
-        if (MODULE_ID == null)
-            {
-                Log.log_err(MODULE_NAME+": module.id config() not set");
-                return false;
-            }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         LOG_LEVEL = config().getInteger(MODULE_NAME+".log_level", 0);
         if (LOG_LEVEL==0)
             {
                 LOG_LEVEL = Constants.LOG_INFO;
-            }
-        
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS == null)
-            {
-                Log.log_err(MODULE_NAME+"."+MODULE_ID+": eb.system_status config() not set");
-                return false;
-            }
-
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER == null)
-            {
-                Log.log_err(MODULE_NAME+"."+MODULE_ID+": eb.manager config() not set");
-                return false;
             }
 
         // eventbus address this FeedHandler will broadcast onto

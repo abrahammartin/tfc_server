@@ -8,10 +8,8 @@ package uk.ac.cam.tfc_server.zone;
 // and also BatcherWorker (which will pass a ZoneConfig object to the Zone)
 
 import java.util.ArrayList;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-
 import uk.ac.cam.tfc_server.util.Position;
 import uk.ac.cam.tfc_server.util.Log;
 import uk.ac.cam.tfc_server.util.Constants;
@@ -33,7 +31,7 @@ public class ZoneConfig {
     public ZoneConfig(JsonObject config)
     {
         valid = true;
-        
+
         MODULE_NAME = config.getString("module.name"); // "zonemanager"
         if (MODULE_NAME==null)
             {
@@ -41,7 +39,7 @@ public class ZoneConfig {
                 valid = false;
                 return;
             }
-        
+
         MODULE_ID = config.getString("module.id"); // A, B, ...
         if (MODULE_ID==null)
             {

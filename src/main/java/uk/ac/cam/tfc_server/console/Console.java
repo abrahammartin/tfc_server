@@ -27,18 +27,13 @@ package uk.ac.cam.tfc_server.console;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.HttpMethod;
 
-import io.vertx.core.file.FileSystem;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.buffer.Buffer;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
@@ -57,20 +52,17 @@ import java.time.format.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.Log;
 import uk.ac.cam.tfc_server.util.Constants;
 
-public class Console extends AbstractVerticle {
+public class Console extends AbstractTFCVerticle {
 
     private final String VERSION = "1.07";
     
     public int LOG_LEVEL; // optional in config(), defaults to Constants.LOG_INFO
 
     private Integer HTTP_PORT; // from config()
-    private String EB_SYSTEM_STATUS; // from config()
-    private String EB_MANAGER; // from config()
-    private String MODULE_NAME; // from config()
-    private String MODULE_ID; // from config()
     private String WEBROOT; // from config()
 
     private final int SYSTEM_STATUS_PERIOD = 8000; // publish status heartbeat every 8 s
@@ -222,51 +214,10 @@ public class Console extends AbstractVerticle {
     }
     
     // Load initialization global constants defining this module from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        // module.name e.g. "console"
-        // module.id e.g. "A"
-        // eb.system_status - String eventbus address for system status messages
-        // eb.manager - evenbus address to subscribe to for system management messages
-
-        MODULE_NAME = config().getString("module.name"); // "console"
-        if (MODULE_NAME==null)
-            {
-                System.err.println("Console: no module.name in config()");
-                return false;
-            }
-        
-        MODULE_ID = config().getString("module.id"); // A, B, ...
-        if (MODULE_ID==null)
-            {
-                System.err.println(MODULE_NAME+": no module.id in config()");
-                return false;
-            }
-
-        // set logging level
-        LOG_LEVEL = config().getInteger(MODULE_NAME+".log_level", 0);
-        if (LOG_LEVEL==0)
-            {
-                LOG_LEVEL = Constants.LOG_INFO;
-            }
-        
-        // common system status reporting address, e.g. for UP messages
-        // picked up by Console
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS==null)
-            {
-                System.err.println(MODULE_NAME+"."+MODULE_ID+": no eb.system_status in config()");
-                return false;
-            }
-
-        // system control address - commands are broadcast on this
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER==null)
-            {
-                System.err.println(MODULE_NAME+"."+MODULE_ID+" no eb.manager in config()");
-                return false;
-            }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         // port for user browser access to this Rita
         HTTP_PORT = config().getInteger(MODULE_NAME+".http.port");

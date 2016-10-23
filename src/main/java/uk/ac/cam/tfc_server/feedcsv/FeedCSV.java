@@ -21,10 +21,8 @@ package uk.ac.cam.tfc_server.feedcsv;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.Handler;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -35,9 +33,10 @@ import java.time.*;
 import java.time.format.*;
 
 // other tfc_server classes
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.Log;
 
-public class FeedCSV extends AbstractVerticle {
+public class FeedCSV extends AbstractTFCVerticle {
     // from config()
     private String MODULE_NAME;       // config module.name - normally "feedhandler"
     private String MODULE_ID;         // config module.id
@@ -95,41 +94,10 @@ public class FeedCSV extends AbstractVerticle {
   } // end start()
 
     // Load initialization global constants defining this Zone from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   module.name - usually "feedcsv"
-        //   module.id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-        //   eb.manager - eventbus address for manager messages
-        
-        MODULE_NAME = config().getString("module.name");
-        if (MODULE_NAME == null)
-        {
-          Log.log_err("FeedCSV: module.name config() not set");
-          return false;
-        }
-        
-        MODULE_ID = config().getString("module.id");
-        if (MODULE_ID == null)
-        {
-          Log.log_err("FeedCSV."+MODULE_ID+": module.id config() not set");
-          return false;
-        }
-
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS == null)
-        {
-          Log.log_err("FeedCSV."+MODULE_ID+": eb.system_status config() not set");
-          return false;
-        }
-
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER == null)
-        {
-          Log.log_err("FeedCSV."+MODULE_ID+": eb.manager config() not set");
-          return false;
-        }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         FEEDHANDLER_ADDRESS = config().getString(MODULE_NAME+".feedhandler.address");
         if (FEEDHANDLER_ADDRESS == null)

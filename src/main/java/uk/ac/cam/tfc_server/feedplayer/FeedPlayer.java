@@ -18,25 +18,20 @@ package uk.ac.cam.tfc_server.feedplayer;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.Handler;
-import io.vertx.core.file.FileSystem;
 import io.vertx.core.eventbus.EventBus;
-//import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
-
-import java.io.*;
-import java.time.*;
-import java.time.format.*;
-import java.util.*;
-import java.text.SimpleDateFormat;
-    
-import uk.ac.cam.tfc_server.util.GTFS;
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.Constants;
+import uk.ac.cam.tfc_server.util.GTFS;
 import uk.ac.cam.tfc_server.util.Log;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 // ********************************************************************************************
 // ********************************************************************************************
@@ -46,11 +41,8 @@ import uk.ac.cam.tfc_server.util.Log;
 // ********************************************************************************************
 // ********************************************************************************************
 
-public class FeedPlayer extends AbstractVerticle {
+public class FeedPlayer extends AbstractTFCVerticle {
     // Config vars
-    private String MODULE_NAME; // from config()
-    private String MODULE_ID; // from config()
-    private String EB_SYSTEM_STATUS; // eventbus status reporting address
     private int    LOG_LEVEL;
 
     private String FEEDPLAYER_ADDRESS; // eventbus address for JSON feed position updates
@@ -309,37 +301,15 @@ public class FeedPlayer extends AbstractVerticle {
 
     
     // Load initialization global constants defining this Zone from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   tfc.module_id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-
-        MODULE_NAME = config().getString("module.name"); // "feedplayer"
-        if (MODULE_NAME==null)
-            {
-                System.err.println("FeedHandler: no module.name in config()");
-                return false;
-            }
-        
-        MODULE_ID = config().getString("module.id"); // A, B, ...
-        if (MODULE_ID==null)
-            {
-                System.err.println("FeedHandler: no module.id in config()");
-                return false;
-            }
+        boolean results = super.get_config();
+        if (!results) return false;
         
         LOG_LEVEL = config().getInteger(MODULE_NAME+".log_level", 0);
         if (LOG_LEVEL==0)
             {
                 LOG_LEVEL = Constants.LOG_INFO;
-            }
-        
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS==null)
-            {
-                System.err.println(MODULE_NAME+"."+MODULE_ID+": no eb.system_status in config()");
-                return false;
             }
 
         FEEDPLAYER_ADDRESS = config().getString(MODULE_NAME+".address"); // eventbus address to publish feed on

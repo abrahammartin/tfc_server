@@ -38,7 +38,8 @@ import java.time.*;
 import java.time.format.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
-    
+
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.GTFS;
 import uk.ac.cam.tfc_server.util.Constants;
 import uk.ac.cam.tfc_server.util.Log;
@@ -51,12 +52,7 @@ import uk.ac.cam.tfc_server.util.Log;
 // ********************************************************************************************
 // ********************************************************************************************
 
-public class Batcher extends AbstractVerticle {
-    // Config vars
-    private String MODULE_NAME; // from config()
-    private String MODULE_ID; // from config()
-    private String EB_SYSTEM_STATUS; // eventbus status reporting address
-
+public class Batcher extends AbstractTFCVerticle {
     private int LOG_LEVEL;
     
     private String BATCHER_ADDRESS; // eventbus address to talk to BatcherWorkers
@@ -170,32 +166,10 @@ public class Batcher extends AbstractVerticle {
 
     
     // Load initialization global constants defining this Zone from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   tfc.module_id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-
-        MODULE_NAME = config().getString("module.name"); // "batcher"
-        if (MODULE_NAME==null)
-            {
-                System.err.println("Batcher config() error: failed to load module.name");
-                return false;
-            }
-        
-        MODULE_ID = config().getString("module.id"); // A, B, ...
-        if (MODULE_ID==null)
-            {
-                System.err.println(MODULE_NAME+" config() error: failed to load module.id");
-                return false;
-            }
-
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS==null)
-            {
-                System.err.println(MODULE_NAME+"."+MODULE_ID+" config() error: failed to load eb.system_status");
-                return false;
-            }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         LOG_LEVEL = config().getInteger(MODULE_NAME+".log_level", 0);
         if (LOG_LEVEL==0)

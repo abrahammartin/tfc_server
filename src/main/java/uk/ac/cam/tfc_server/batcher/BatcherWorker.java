@@ -26,31 +26,35 @@ package uk.ac.cam.tfc_server.batcher;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.Handler;
-import io.vertx.core.file.FileSystem;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-
-import java.io.*;
-import java.time.*;
-import java.time.format.*;
-import java.util.*;
-import java.text.SimpleDateFormat;
-import java.nio.file.*;
-import java.util.stream.Collectors;
-
-import uk.ac.cam.tfc_server.util.GTFS;
+import io.vertx.core.json.JsonObject;
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
+import uk.ac.cam.tfc_server.msgfiler.FilerConfig;
+import uk.ac.cam.tfc_server.msgfiler.FilerUtils;
 import uk.ac.cam.tfc_server.util.Constants;
+import uk.ac.cam.tfc_server.util.GTFS;
+import uk.ac.cam.tfc_server.util.IMsgHandler;
 import uk.ac.cam.tfc_server.util.Log;
-import uk.ac.cam.tfc_server.zone.ZoneConfig; // Config to be passed to Zone
-import uk.ac.cam.tfc_server.zone.ZoneCompute; // BatcherWorker will call methods in Zone directly
-import uk.ac.cam.tfc_server.msgfiler.FilerConfig; // BatcherWorker will instantiate FilerUtils
-import uk.ac.cam.tfc_server.msgfiler.FilerUtils; // BatcherWorker will instantiate FilerUtils
-import uk.ac.cam.tfc_server.util.IMsgHandler; // Interface for message handling in caller
+import uk.ac.cam.tfc_server.zone.ZoneCompute;
+import uk.ac.cam.tfc_server.zone.ZoneConfig;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 // ********************************************************************************************
@@ -61,11 +65,8 @@ import uk.ac.cam.tfc_server.util.IMsgHandler; // Interface for message handling 
 // ********************************************************************************************
 // ********************************************************************************************
 
-public class BatcherWorker extends AbstractVerticle {
+public class BatcherWorker extends AbstractTFCVerticle {
     // Config vars
-    private String MODULE_NAME; // from config()
-    private String MODULE_ID; // from config()
-
     private String BATCHER_ADDRESS; // eventbus address to communicate with Batcher controller
 
     private String TFC_DATA_BIN; // root of bin input files
@@ -378,25 +379,10 @@ public class BatcherWorker extends AbstractVerticle {
 
     
     // Load initialization global constants defining this Zone from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   tfc.module_id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-
-        MODULE_NAME = config().getString("module.name"); // "batcherworker"
-        if (MODULE_NAME==null)
-            {
-                System.err.println("BatcherWorker config() error: failed to load module.name");
-                return false;
-            }
-        
-        MODULE_ID = config().getString("module.id"); // A, B, ...
-        if (MODULE_ID==null)
-            {
-                System.err.println(MODULE_NAME+" config() error: failed to load module.id");
-                return false;
-            }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         LOG_LEVEL = config().getInteger(MODULE_NAME+".log_level", 0);
         if (LOG_LEVEL==0)

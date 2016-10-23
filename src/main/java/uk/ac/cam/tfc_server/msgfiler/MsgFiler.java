@@ -35,26 +35,19 @@ package uk.ac.cam.tfc_server.msgfiler;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
+import uk.ac.cam.tfc_server.util.Log;
 
-import java.io.*;
 import java.util.ArrayList;
 
 // other tfc_server classes
-import uk.ac.cam.tfc_server.util.Log;
 
-public class MsgFiler extends AbstractVerticle {
+public class MsgFiler extends AbstractTFCVerticle {
     // from config()
-    private String MODULE_NAME;       // config module.name - normally "msgfiler"
-    private String MODULE_ID;         // config module.id - unique for this verticle
-    private String EB_SYSTEM_STATUS;  // config eb.system_status
-    private String EB_MANAGER;        // config eb.manager
-    
     private ArrayList<FilerConfig> START_FILERS; // config msgfilers.filers parameters
     
     private final int SYSTEM_STATUS_PERIOD = 10000; // publish status heartbeat every 10 s
@@ -138,41 +131,10 @@ public class MsgFiler extends AbstractVerticle {
     // Load initialization global constants defining this MsgFiler from config()
     //**************************************************************************
     //**************************************************************************
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   module.name - usually "msgfiler"
-        //   module.id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-        //   eb.manager - eventbus address for manager messages
-        
-        MODULE_NAME = config().getString("module.name");
-        if (MODULE_NAME == null)
-        {
-          Log.log_err("MsgFiler: module.name config() not set");
-          return false;
-        }
-        
-        MODULE_ID = config().getString("module.id");
-        if (MODULE_ID == null)
-        {
-          Log.log_err("MsgFiler: module.id config() not set");
-          return false;
-        }
-
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS == null)
-        {
-          Log.log_err("MsgFiler."+MODULE_ID+": eb.system_status config() not set");
-          return false;
-        }
-
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER == null)
-        {
-          Log.log_err("MsgFiler."+MODULE_ID+": eb.manager config() not set");
-          return false;
-        }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         // iterate through the msgfiler.filers config values
         START_FILERS = new ArrayList<FilerConfig>();
@@ -191,6 +153,6 @@ public class MsgFiler extends AbstractVerticle {
             }
 
         return true;
-    } // end get_config()
+    }
 
-} // end class FeedCSV
+}

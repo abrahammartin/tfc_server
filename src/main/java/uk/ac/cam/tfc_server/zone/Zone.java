@@ -65,27 +65,15 @@ package uk.ac.cam.tfc_server.zone;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.Handler;
-import io.vertx.core.file.FileSystem;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import uk.ac.cam.tfc_server.util.Log;
-import uk.ac.cam.tfc_server.zone.ZoneConfig; // also used by BatcherWorker for synchronous compute
-import uk.ac.cam.tfc_server.zone.ZoneCompute;// also used by BatcherWorker for synchronous compute
-import uk.ac.cam.tfc_server.zone.Vehicle;
+import io.vertx.core.json.JsonObject;
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.Constants;
-import uk.ac.cam.tfc_server.util.Position;
-
-import uk.ac.cam.tfc_server.util.IMsgHandler; // Interface to provide handle_msg routine
+import uk.ac.cam.tfc_server.util.IMsgHandler;
+import uk.ac.cam.tfc_server.util.Log;
+import java.util.HashMap;
 
 // ********************************************************************************************
 // ********************************************************************************************
@@ -95,12 +83,9 @@ import uk.ac.cam.tfc_server.util.IMsgHandler; // Interface to provide handle_msg
 // ********************************************************************************************
 // ********************************************************************************************
 
-public class Zone extends AbstractVerticle {
+public class Zone extends AbstractTFCVerticle {
 
     private ZoneConfig zone_config;        // initialized in get_config()
-
-    private String EB_SYSTEM_STATUS;  // vertx config eb.system_status
-    private String EB_MANAGER;        // vertx config eb.manager
 
     private final int SYSTEM_STATUS_PERIOD = 10000; // publish status heartbeat every 10 s
     private final int SYSTEM_STATUS_AMBER_SECONDS = 15; // delay before flagging system as AMBER
@@ -385,13 +370,10 @@ public class Zone extends AbstractVerticle {
     } // end class MsgHandler
     
     // Load initialization global constants defining this Zone from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   module.name - usually "zone"
-        //   module.id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-        //   eb.manager - eventbus address for manager messages
+        boolean results = super.get_config();
+        if (!results) return false;
         
         // Expected config() values defining this Zone are:
         //   zone.feed (optional) address to subscribe for position feed
@@ -404,20 +386,6 @@ public class Zone extends AbstractVerticle {
         //   zone.finish_index - int
 
         zone_config = new ZoneConfig(config());
-        
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS==null)
-            {
-                Log.log_err("Zone."+zone_config.MODULE_ID+": no eb.system_status in config()");
-                return false;
-            }
-
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER==null)
-            {
-                Log.log_err("Zone."+zone_config.MODULE_ID+": no eb.manager in config()");
-                return false;
-            }
         
         return zone_config.valid;
     }

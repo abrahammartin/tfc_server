@@ -32,15 +32,12 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 
-public class StaticServer extends AbstractVerticle {
+public class StaticServer extends AbstractTFCVerticle {
 
     private Integer HTTP_PORT; // from config()
 
-    private String EB_SYSTEM_STATUS; // from config()
-    private String EB_MANAGER; // from config()
-    private String MODULE_NAME; // from config()
-    private String MODULE_ID; // from config()
     private String WEBROOT; // from config()
     
     private String BASE_URI; // used as template parameter for web pages, built from config()
@@ -131,44 +128,10 @@ public class StaticServer extends AbstractVerticle {
     }
     
     // Load initialization global constants defining this module from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        // module.name e.g. "rita"
-        // module.id e.g. "A"
-        // eb.system_status - String eventbus address for system status messages
-        // eb.manager - evenbus address to subscribe to for system management messages
-
-        MODULE_NAME = config().getString("module.name"); // "staticserver"
-        if (MODULE_NAME==null)
-            {
-                System.err.println("StaticServer: no module.name in config()");
-                return false;
-            }
-        
-        MODULE_ID = config().getString("module.id"); // A, B, ...
-        if (MODULE_ID==null)
-            {
-                System.err.println("StaticServer: no module.id in config()");
-                return false;
-            }
-
-        // common system status reporting address, e.g. for UP messages
-        // picked up by Console
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS==null)
-            {
-                System.err.println("StaticServer: no eb.system_status in config()");
-                return false;
-            }
-
-        // system control address - commands are broadcast on this
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER==null)
-            {
-                System.err.println("StaticServer: no eb.manager in config()");
-                return false;
-            }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         // port for user browser access to this Rita
         HTTP_PORT = config().getInteger(MODULE_NAME+".http.port");

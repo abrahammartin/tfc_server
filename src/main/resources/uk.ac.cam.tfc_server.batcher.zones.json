@@ -9,6 +9,7 @@
             "module.id":             "A",
 
             "eb.system_status":      "tfc.system_status",
+            "eb.manager":            "tfc.manager",
 
             "batcher.log_level":     2,
 

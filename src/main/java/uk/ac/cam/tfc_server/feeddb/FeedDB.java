@@ -9,19 +9,14 @@ import info.archinnov.achilles.generated.ManagerFactory;
 import info.archinnov.achilles.generated.ManagerFactoryBuilder;
 import info.archinnov.achilles.generated.manager.BusData_Manager;
 import info.archinnov.achilles.type.CassandraVersion;
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
 import uk.ac.cam.tfc_server.util.Log;
 
-public class FeedDB extends AbstractVerticle {
-    // from config()
-    private String MODULE_NAME;       // config module.name - normally "feedhandler"
-    private String MODULE_ID;         // config module.id
-    private String EB_SYSTEM_STATUS;  // config eb.system_status
-    private String EB_MANAGER;        // config eb.manager
+public class FeedDB extends AbstractTFCVerticle {
     private String FEEDHANDLER_ADDRESS; // config MODULE_NAME.feedhandler.address
 
     private final int SYSTEM_STATUS_PERIOD = 10000; // publish status heartbeat every 10 s
@@ -151,7 +146,7 @@ public class FeedDB extends AbstractVerticle {
     public void start(Future<Void> fut) throws Exception {
         // load FeedDB initialization values from config()
         if (!get_config()) {
-            Log.log_err("FeedDB "+ MODULE_ID + " failed to load initial config()");
+            Log.log_err("FeedDB failed to load initial config()");
             vertx.close();
             return;
         }
@@ -190,37 +185,10 @@ public class FeedDB extends AbstractVerticle {
     }
 
     // Load initialization global constants defining this Zone from config()
-    private boolean get_config()
+    protected boolean get_config()
     {
-        // config() values needed by all TFC modules are:
-        //   module.name - usually "feeddb"
-        //   module.id - unique module reference to be used by this verticle
-        //   eb.system_status - String eventbus address for system status messages
-        //   eb.manager - eventbus address for manager messages
-
-        MODULE_NAME = config().getString("module.name");
-        if (MODULE_NAME == null) {
-            Log.log_err("FeedDB: module.name config() not set");
-            return false;
-        }
-
-        MODULE_ID = config().getString("module.id");
-        if (MODULE_ID == null) {
-            Log.log_err("FeedDB."+MODULE_ID+": module.id config() not set");
-            return false;
-        }
-
-        EB_SYSTEM_STATUS = config().getString("eb.system_status");
-        if (EB_SYSTEM_STATUS == null) {
-            Log.log_err("FeedDB."+MODULE_ID+": eb.system_status config() not set");
-            return false;
-        }
-
-        EB_MANAGER = config().getString("eb.manager");
-        if (EB_MANAGER == null) {
-            Log.log_err("FeedDB."+MODULE_ID+": eb.manager config() not set");
-            return false;
-        }
+        boolean results = super.get_config();
+        if (!results) return false;
 
         FEEDHANDLER_ADDRESS = config().getString(MODULE_NAME+".feedhandler.address");
         if (FEEDHANDLER_ADDRESS == null) {
