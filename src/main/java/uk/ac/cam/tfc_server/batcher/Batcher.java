@@ -22,27 +22,19 @@ package uk.ac.cam.tfc_server.batcher;
 // *************************************************************************************************
 // *************************************************************************************************
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.Handler;
-import io.vertx.core.file.FileSystem;
-import io.vertx.core.eventbus.EventBus;
-//import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.DeploymentOptions;
-
-import java.io.*;
-import java.time.*;
-import java.time.format.*;
-import java.util.*;
-import java.text.SimpleDateFormat;
-
+import io.vertx.core.Future;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import uk.ac.cam.tfc_server.core.AbstractTFCVerticle;
-import uk.ac.cam.tfc_server.util.GTFS;
 import uk.ac.cam.tfc_server.util.Constants;
 import uk.ac.cam.tfc_server.util.Log;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+//import io.vertx.core.json.Json;
 
 // ********************************************************************************************
 // ********************************************************************************************

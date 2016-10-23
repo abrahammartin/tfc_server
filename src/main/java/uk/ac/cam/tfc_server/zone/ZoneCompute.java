@@ -5,22 +5,20 @@ package uk.ac.cam.tfc_server.zone;
 // Provides the compute/analysis elements of a Zone.
 // Used by Zone and BatcherWorker
 //
-import uk.ac.cam.tfc_server.zone.ZoneConfig;
-import uk.ac.cam.tfc_server.zone.Vehicle;
-import uk.ac.cam.tfc_server.util.Position;
-import uk.ac.cam.tfc_server.util.Constants;
-import uk.ac.cam.tfc_server.util.Log;
-
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-// time/date crapola
-import java.util.Date;
-import java.text.SimpleDateFormat; // for timestamp conversion to HH:MM:SS
-import java.time.LocalTime; // for timestamp duration conversion to HH:mm:ss
-import java.util.TimeZone;
-import java.util.HashMap;
+import io.vertx.core.json.JsonObject;
+import uk.ac.cam.tfc_server.util.Constants;
+import uk.ac.cam.tfc_server.util.IMsgHandler;
+import uk.ac.cam.tfc_server.util.Log;
+import uk.ac.cam.tfc_server.util.Position;
 
-import uk.ac.cam.tfc_server.util.IMsgHandler; // Interface for message handling in caller
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.TimeZone;
+
+// time/date crapola
 
 public class ZoneCompute {
 
